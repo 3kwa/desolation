@@ -1,6 +1,6 @@
 import sexpdata
 
-from .context import expand
+from .context import parse, expand
 
 
 def evaluate(domain, *, expression, context=None, **kwargs):
@@ -12,7 +12,7 @@ def evaluate(domain, *, expression, context=None, **kwargs):
     17.5
     """
     if context is not None:
-        expression = expand(expression, context)
+        expression = expand(expression, parse(context))
     for key, value in domain.SUBSTITUTIONS.items():
         expression = expression.replace(f" {key} ", f" {value} ")
     return _evaluate(domain, sexpdata.loads(expression), kwargs)

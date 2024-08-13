@@ -54,7 +54,7 @@ def test_define_using_function_in_context():
     (define (cube x) (mul x (square x)))
     """
     result = parse(context)
-    assert result["cube"] == Define("cube", ("x",), "(mul x (square x))")
+    assert result["cube"] == Define("cube", ("x",), "(mul x (mul x x))")
 
 
 def test_validate_expression_uses_operators_in_domain():

@@ -4,29 +4,44 @@ from functools import lru_cache
 import sexpdata
 
 
-def expand(expression, context):
+def expand(expression, definitions={}):
+    def expand_recursive(expr):
+        if isinstance(expr, list) and expr:
+            operator = expr[0].value()
+            definition = definitions.get(operator)
+
+            if definition:
+                arity = len(definition.arguments)
+                count = len(expr) - 1
+                assert arity == count, f"{operator} arity is {arity} not {count}"
+
+                result = sexpdata.loads(definition.expression)
+                for arg, sub in zip(definition.arguments, expr[1:]):
+                    result = replace_symbol(result, arg, expand_recursive(sub))
+
+                return result
+            else:
+                return [expand_recursive(subexpr) for subexpr in expr]
+        elif isinstance(expr, sexpdata.Symbol):
+            zero_arg_def = next((d for d in definitions.values()
+                                 if d.name == expr.value() and not d.arguments), None)
+            if zero_arg_def:
+                return expand_recursive(sexpdata.loads(zero_arg_def.expression))
+            return expr
+        else:
+            return expr
+
+    def replace_symbol(expr, symbol, replacement):
+        if isinstance(expr, list):
+            return [replace_symbol(subexpr, symbol, replacement) for subexpr in expr]
+        elif isinstance(expr, sexpdata.Symbol) and expr.value() == symbol:
+            return replacement
+        else:
+            return expr
+
     parsed = sexpdata.loads(expression)
-    operator = parsed[0].value()
-    definition = parse(context).get(operator)
-    if definition:
-        arity = len(definition.arguments)
-        count = len(parsed[1:])
-        assert arity == count, f"{operator} arity is {arity} not {count}"
-
-        result = definition.expression[:]
-
-        for argument, substitution in zip(
-            definition.arguments, (sexpdata.dumps(argument) for argument in parsed[1:])
-        ):
-            result = result.replace(argument, substitution)
-
-    else:
-        result = expression
-        for definition in parse(context).values():
-            if len(definition.arguments) == 0:
-                result = result.replace(definition.name, definition.expression)
-
-    return result
+    expanded = expand_recursive(parsed)
+    return sexpdata.dumps(expanded)
 
 
 @lru_cache
@@ -48,7 +63,7 @@ def parse(context, *, domain=None):
                 domain is not None and symbol.value() not in domain.FUNCTIONS.keys()
             ) and symbol.value() not in result:
                 raise ContextError(f"{symbol.value()}=?")
-        expression = sexpdata.dumps(define[2])
+        expression = expand(sexpdata.dumps(define[2]), result)
         result[name] = Define(name, arguments, expression)
     return result
 

@@ -20,8 +20,11 @@ def test_evaluate_domain_context():
     import arithmetic as domain
 
     result = partial(evaluate, domain)(
-        expression="(square a)",
-        context="(define (square x) (mul x x))",
+        expression="(cube a)",
+        context="""
+            (define (square x) (mul x x))
+            (define (cube x) (mul x (square x)))
+            """,
         a=2,
-        )
-    assert result == 4
+    )
+    assert result == 8
