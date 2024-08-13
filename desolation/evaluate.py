@@ -6,7 +6,7 @@ from .context import parse, expand
 def evaluate(domain, *, expression, context=None, **kwargs):
     """
     >>> partial(evaluate, domain)(
-    ...     "(mul (add (div a b) c) e)",
+    ...     expression="(mul (add (div a b) c) e)",
     ...     a=1, b=2, c=3, e=5,
     ... )
     17.5
