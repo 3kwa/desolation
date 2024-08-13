@@ -1,7 +1,9 @@
 import sexpdata
 
+from .context import expand
 
-def evaluate(domain, expression, **kwargs):
+
+def evaluate(domain, *, expression, context=None, **kwargs):
     """
     >>> partial(evaluate, domain)(
     ...     "(mul (add (div a b) c) e)",
@@ -9,6 +11,8 @@ def evaluate(domain, expression, **kwargs):
     ... )
     17.5
     """
+    if context is not None:
+        expression = expand(expression, context)
     for key, value in domain.SUBSTITUTIONS.items():
         expression = expression.replace(f" {key} ", f" {value} ")
     return _evaluate(domain, sexpdata.loads(expression), kwargs)

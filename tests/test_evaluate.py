@@ -7,10 +7,21 @@ def test_arithmetic_domain_evaluation():
     import arithmetic as domain
 
     result = partial(evaluate, domain)(
-        "(mul (add (div a b) c) e)",
+        expression="(mul (add (div a b) c) e)",
         a=1,
         b=2,
         c=3,
         e=5,
     )
     assert result == 17.5
+
+
+def test_evaluate_domain_context():
+    import arithmetic as domain
+
+    result = partial(evaluate, domain)(
+        expression="(square a)",
+        context="(define (square x) (mul x x))",
+        a=2,
+        )
+    assert result == 4
