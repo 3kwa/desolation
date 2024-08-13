@@ -23,8 +23,14 @@ def expand(expression, definitions={}):
             else:
                 return [expand_recursive(subexpr) for subexpr in expr]
         elif isinstance(expr, sexpdata.Symbol):
-            zero_arg_def = next((d for d in definitions.values()
-                                 if d.name == expr.value() and not d.arguments), None)
+            zero_arg_def = next(
+                (
+                    d
+                    for d in definitions.values()
+                    if d.name == expr.value() and not d.arguments
+                ),
+                None,
+            )
             if zero_arg_def:
                 return expand_recursive(sexpdata.loads(zero_arg_def.expression))
             return expr
