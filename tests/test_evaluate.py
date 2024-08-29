@@ -1,5 +1,7 @@
 from functools import partial
 
+import pytest
+
 from desolation.evaluate import evaluate
 
 
@@ -28,3 +30,15 @@ def test_evaluate_domain_context():
         a=2,
     )
     assert result == 8
+
+
+@pytest.mark.xfail
+def test_evaluate_core_filter():
+    import arithmetic as domain
+
+    result = partial(evaluate, domain)(
+        expression="(filter positive? list)",
+        context="(define (positive? x) (> x 0))",
+        list=[-2, -1, 0, 1, 2],
+    )
+    assert result == [1, 2]

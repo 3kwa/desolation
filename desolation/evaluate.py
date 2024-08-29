@@ -19,12 +19,23 @@ def evaluate(domain, *, expression, context=None, **kwargs):
 
 
 def _evaluate(domain, expression, kwargs):
+    # functions = dict(inspect.getmembers(core, inspect.isfunction))
+    functions = {}
+    functions.update(domain.FUNCTIONS)
     try:
         expression[0]
     except TypeError:
         return expression
     try:
-        return domain.FUNCTIONS[expression[0].value()](
+        if expression[0].value() == "filter":
+            return [x for x in expression[2] if _evaluate(domain, expression[1], {"x": x})]
+        elif expression[0].value() == "map":
+            return [_evaluate(domain, expression[1], {"x": x}) for x in expression[2]]
+    # FIXME
+    except: # noqa
+        pass
+    try:
+        return functions[expression[0].value()](
             *[_evaluate(domain, e, kwargs) for e in expression[1:]]
         )
     except KeyError:
