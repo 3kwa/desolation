@@ -6,6 +6,11 @@ build-backend = "flit_core.buildapi"
 name = "desolation"
 authors = [{name = "Eugene Van den Bulke", email = "eugene.vandenbulke@gmail.com"}]
 dynamic = ["version", "description"]
+readme = "README.md"
+dependencies = [
+    "sexpdata",
+]
+license = {file = "LICENSE"}
 
 [project.urls]
 Home = "http://github.com/3kwa/desolation"
